@@ -1,0 +1,9 @@
+<div th:fragment="formErrorsFragment" class="alert alert-danger"
+     role="alert" th:if="${#fields.hasAnyErrors()}">
+    <div th:each="err : ${#fields.globalErrors()}" th:text="${err}"/>  <!-- 닫는 태그로, 하나의 태그로, 오류는 아님.-->
+</div>
+
+<div th:fragment="formGlobalErrorsFragment" class="alert alert-danger"
+     role="alert" th:if="${#fields.hasGlobalErrors()}">
+    <div th:each="err : ${#fields.globalErrors()}" th:text="${err}"/>  <!-- 닫는 태그로, 하나의 태그로, 오류는 아님.-->
+</div>
