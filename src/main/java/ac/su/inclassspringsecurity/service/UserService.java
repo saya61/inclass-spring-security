@@ -16,17 +16,22 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     // 유저 create
-    public void create() {
+    public void create(
+            String username,
+            String password1,
+            String email
+    ) {
         User newUser = new User();
-        newUser.setUsername("test");
+        newUser.setUsername(username);
         newUser.setPassword(
-                passwordEncoder.encode("test")
+                passwordEncoder.encode(password1)
         );
-        newUser.setEmail("test");
-        newUser.setRole(UserRole.ADMIN);    // Enum default validation 필수 체크됨.
+        newUser.setEmail(email);
+        newUser.setRole(UserRole.USER);    // Enum default validation 필수 체크됨.
+
+        // 중복 유저 체크
         validateDuplicateUser(newUser);
         User savedUser = userRepository.save(newUser);
-        System.out.println(savedUser);
     }
 
     // 중복 유저 검사 메서드 선언
