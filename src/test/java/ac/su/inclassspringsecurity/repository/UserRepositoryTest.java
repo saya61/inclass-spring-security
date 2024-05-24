@@ -33,4 +33,49 @@ class UserRepositoryTest {
         User savedUser = userRepository.save(newUser);
         System.out.println(savedUser);
     }
+
+    @Test
+    @DisplayName("유저 중복 테스트 (username)")
+    public void duplicateByUsername() {
+        create();
+        boolean exists = userRepository.existsByUsername("test");
+        System.out.println(exists);
+        assert (exists);
+
+        exists = userRepository.existsByUsername("test1");
+        System.out.println(exists);
+        assert (!exists);
+        // 테스트 코드는 다 있는게 정상
+    }
+
+    @Test
+    @DisplayName("유저 중복 테스트 (email)")
+    public void duplicateByEmail() {
+        create();
+        boolean exists = userRepository.existsByEmail("sample@samp.le");
+        System.out.println(exists);
+        assert (exists);
+
+        exists = userRepository.existsByEmail("sample@samp.le");
+        System.out.println(exists);
+        assert (!exists);
+    }
+
+    @Test
+    @DisplayName("username 및 email 중복 검사")
+    public void validateDuplicateUser() {
+        create();
+        User user = new User();
+        user.setUsername("test");
+        user.setPassword(
+                passwordEncoder.encode("test")
+        );
+        user.setEmail("sample.sam.ple");
+        user.setRole(UserRole.ADMIN);    // Enum default validation 필수 체크됨.
+
+        // username 중복 검사
+        assert userRepository.existsByUsername(user.getUsername());
+        // email 중복 검사
+        assert  userRepository.existsByEmail(user.getEmail());
+    }
 }
