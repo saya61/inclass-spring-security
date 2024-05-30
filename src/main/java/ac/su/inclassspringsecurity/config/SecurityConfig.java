@@ -1,18 +1,25 @@
 package ac.su.inclassspringsecurity.config;
 
+import ac.su.inclassspringsecurity.config.Jwt.TokenProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity  // URL 요청에 대한 Spring Security 동작 활성화
+@RequiredArgsConstructor
 public class SecurityConfig {
+    private final TokenProvider tokenProvider;
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 //        http
@@ -27,16 +34,23 @@ public class SecurityConfig {
 //                                ).permitAll()
 //                )
 //        ;
+        // 조건부 및 선후관계가 때마다 달라진다.
         http
                 .authorizeHttpRequests(
                         (authorizeHttpRequests) ->
                                 authorizeHttpRequests.requestMatchers(
                                         // Apache Ant 스타일 패턴을 사용해 URL 매칭 정의
                                         new AntPathRequestMatcher(
-                                                "/**"   // 모든 URL 패턴에 대해 허용
+                                                "/"   // 메인 페이지 비회원 접속 허용
                                         )
-                                        // ).denyAll()
+                                // ).denyAll()
                                 ).permitAll()
+                                .requestMatchers(
+                                        new AntPathRequestMatcher(
+                                                "/users/login"   // 로그인 URL 비회원 접속 허용
+                                        )
+                                ).permitAll()
+                                .anyRequest().authenticated()   // 나머지 모든 URL 회원 로그인 요구
                 )
                 .csrf(
                         (csrf) ->
@@ -58,10 +72,12 @@ public class SecurityConfig {
                                 )
                 )
                 .formLogin(
-                        (formLogin) ->
-                                formLogin
-                                        .loginPage("/users/login")
-                                        .defaultSuccessUrl("/")
+//                        (formLogin) ->
+//                                formLogin   // Controller 에 PostMapping URL 바인딩
+//                                                 // POST 요청을 아래 라인에서 수신하도록 설정 - 명시적 로그인을 구현하고자 한다.
+//                                        .loginPage("/users/login")
+//                                        .defaultSuccessUrl("/")
+                        AbstractHttpConfigurer::disable
                 )
                 .logout(
                         (logout) ->
@@ -69,6 +85,15 @@ public class SecurityConfig {
                                         .logoutRequestMatcher(new AntPathRequestMatcher("/users/logout"))
                                         .logoutSuccessUrl("/")
                                         .invalidateHttpSession(true)
+                )
+                .sessionManagement(
+                        (sessionConfig) -> {
+                            sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                        }
+                )
+                .addFilterBefore(
+                        tokenAuthenticationFilter(),    // token 을 username, password 검사보다 보다 먼저 검사한다.
+                        UsernamePasswordAuthenticationFilter.class
                 )
         ;
 
@@ -79,5 +104,10 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public TokenAuthenticationFilter tokenAuthenticationFilter() {
+        return new TokenAuthenticationFilter(tokenProvider);
     }
 }

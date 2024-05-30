@@ -1,6 +1,9 @@
 package ac.su.inclassspringsecurity.service;
 
+import ac.su.inclassspringsecurity.config.Jwt.JwtProperties;
+import ac.su.inclassspringsecurity.config.Jwt.TokenProvider;
 import ac.su.inclassspringsecurity.constant.UserRole;
+import ac.su.inclassspringsecurity.domain.AccessTokenDTO;
 import ac.su.inclassspringsecurity.domain.SpringUser;
 import ac.su.inclassspringsecurity.domain.User;
 import ac.su.inclassspringsecurity.repository.UserRepository;
@@ -13,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -22,6 +26,7 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TokenProvider tokenProvider;
 
     // 로그인 전용 메서드 Override
     @Override
@@ -87,5 +92,28 @@ public class UserService implements UserDetailsService {
     // 이메일 중복 체크
     public boolean isEmailExist(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    public AccessTokenDTO getAccessToken(User user) {
+        // 1) Spring Security 로그인 전용 메서드 loadUserByUsername 사용해 인증
+        UserDetails userDetails;
+        try {
+            userDetails = loadUserByUsername(user.getEmail());    // UserDetails 리턴
+        } catch (Exception e) {
+            return null;
+        }
+        // 2) UserService 에 TokenProvider 주입 -- final 필드로 생성자 주입 완료
+        // 3) TokenProvider 에서 Token String 을 생성
+        // 비밀번호 체크
+        if (passwordEncoder.matches(user.getPassword(), userDetails.getPassword())) {  // user - raw, userDetails - encoded
+            // 4) AccessTokenDTO 로 Wrapping 및 리턴
+            String accessToken = tokenProvider.generateToken(user, Duration.ofHours(1L));
+            String tokenType = "Bearer";
+            return new AccessTokenDTO(
+                    accessToken,
+                    tokenType
+            );
+        }
+        return null;    // 패스워드 불일치 시 null 반환
     }
 }

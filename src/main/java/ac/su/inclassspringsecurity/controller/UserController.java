@@ -1,9 +1,12 @@
 package ac.su.inclassspringsecurity.controller;
 
+import ac.su.inclassspringsecurity.domain.AccessTokenDTO;
+import ac.su.inclassspringsecurity.domain.User;
 import ac.su.inclassspringsecurity.domain.UserCreateForm;
 import ac.su.inclassspringsecurity.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -70,5 +73,15 @@ public class UserController {
     @GetMapping("/login")
     public String login() {
         return "login_form";
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(User user) {
+        // 로그인 정보가 정확한 경우 Token 발급
+        AccessTokenDTO accessToken = userService.getAccessToken(user);
+        if (accessToken == null) {
+            return ResponseEntity.badRequest().body("로그인 실패");
+        }
+        return ResponseEntity.ok(accessToken);
     }
 }
