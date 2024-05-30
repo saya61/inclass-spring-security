@@ -9,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -28,7 +30,7 @@ class UserRepositoryTest {
         newUser.setPassword(
                 passwordEncoder.encode("test")
         );
-        newUser.setEmail("test");
+        newUser.setEmail("sample.sam.ple");
         newUser.setRole(UserRole.ADMIN);    // Enum default validation 필수 체크됨.
         User savedUser = userRepository.save(newUser);
         System.out.println(savedUser);
@@ -46,6 +48,19 @@ class UserRepositoryTest {
         System.out.println(exists);
         assert (!exists);
         // 테스트 코드는 다 있는게 정상
+    }
+
+    @Test
+    @DisplayName("email 필드 기준 유저 검색")
+    public void findByEmail() {
+        create();
+        Optional<User> foundUser = userRepository.findByEmail("sample.sam.ple");
+        assert foundUser.isPresent();
+        System.out.println("유저 검색 성공!");
+
+        foundUser = userRepository.findByEmail("sample.sam.ple2");
+        assert foundUser.isEmpty();
+        System.out.println("유저 검색 실패");
     }
 
     @Test
@@ -78,4 +93,6 @@ class UserRepositoryTest {
         // email 중복 검사
         assert  userRepository.existsByEmail(user.getEmail());
     }
+
+
 }

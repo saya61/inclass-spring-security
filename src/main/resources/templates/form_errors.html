@@ -7,3 +7,8 @@
      role="alert" th:if="${#fields.hasGlobalErrors()}">
     <div th:each="err : ${#fields.globalErrors()}" th:text="${err}"/>  <!-- 닫는 태그로, 하나의 태그로, 오류는 아님.-->
 </div>
+
+<div th:fragment="simpleFromErrorFragment" class="alert alert-danger"
+     role="alert" th:if="${param.error}">
+    <div>사용자ID 또는 비밀번호가 일치하지 않습니다.</div>
+</div>

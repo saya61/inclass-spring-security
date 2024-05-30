@@ -1,20 +1,53 @@
 package ac.su.inclassspringsecurity.service;
 
 import ac.su.inclassspringsecurity.constant.UserRole;
+import ac.su.inclassspringsecurity.domain.SpringUser;
 import ac.su.inclassspringsecurity.domain.User;
 import ac.su.inclassspringsecurity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+// UserDetailsService 패키지에 Spring Security 가 제공하는 인터페이스로, 유저 정보를 가져오는 메서드를 구현해야 함.
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Optional;
+
 @Service
 @Transactional  // 실패 시 발생하는 예외 처리를 위해 사용
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    // 로그인 전용 메서드 Override
+    @Override
+    public UserDetails loadUserByUsername(
+            String email    // 로그인 ID 를 말함, username 에서 email 로 변경했지만 오류 x = String 으로 타입이 같음.
+    ) throws UsernameNotFoundException {
+        // UserDetails 객체를 생성 및 반환
+        Optional<User> registeredUser = userRepository.findByEmail(email);
+        if (registeredUser.isEmpty()) {
+            throw new UsernameNotFoundException(email);
+        }
+        // Optional 객체를 반환하므로 get() 메서드로 User 객체를 반환
+        // User 객체를 SpringUser 객체로 변환하여 반환필요
+
+        // 1번. 인증에 사용하기 위해 준비된 UserDetails 구현체
+//        User foundUser = registeredUser.get();
+//        return new SpringUser(
+//                foundUser.getEmail(),
+//                foundUser.getPassword(),
+//                new ArrayList<>()
+//        );
+        // 2번. SpringUser 객체로 변환하여 반환
+        return SpringUser.getSpringUserDetails(registeredUser.get());
+    }
+
+    // CRUD 기능 구현
     // 유저 create
     public void create(
             String username,

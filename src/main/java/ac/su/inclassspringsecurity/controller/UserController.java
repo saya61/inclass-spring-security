@@ -66,4 +66,9 @@ public class UserController {
         // 3. 회원 가입 성공시
         return "redirect:/";
     }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login_form";
+    }
 }
