@@ -1,17 +1,23 @@
 package ac.su.inclassspringsecurity.controller;
 
 import ac.su.inclassspringsecurity.domain.AccessTokenDTO;
+import ac.su.inclassspringsecurity.domain.Product;
 import ac.su.inclassspringsecurity.domain.User;
 import ac.su.inclassspringsecurity.domain.UserCreateForm;
 import ac.su.inclassspringsecurity.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -75,13 +81,25 @@ public class UserController {
         return "login_form";
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(User user) {
-        // 로그인 정보가 정확한 경우 Token 발급
-        AccessTokenDTO accessToken = userService.getAccessToken(user);
-        if (accessToken == null) {
-            return ResponseEntity.badRequest().body("로그인 실패");
+//    @PostMapping("/login")
+//    public ResponseEntity<?> login(User user) {
+//        // 로그인 정보가 정확한 경우 Token 발급
+//        AccessTokenDTO accessToken = userService.getAccessToken(user);
+//        if (accessToken == null) {
+//            return ResponseEntity.badRequest().body("로그인 실패");
+//        }
+//        return ResponseEntity.ok(accessToken);
+//    }
+
+    @GetMapping("/make-dummy")
+    public ResponseEntity<List<User>> makeDummyData(
+            @RequestParam(value = "count", required = false, defaultValue = "20") int count) {
+        // count 값이 1 이상 100 이하가 되도록 제약조건 추가하기!
+        if (count < 1 || count > 100) {
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
         }
-        return ResponseEntity.ok(accessToken);
+        List<User> users = userService.makeDummyData(count);
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
+
 }

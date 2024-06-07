@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layouts/base-layout}"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>상품 상세 페이지</title>
+</head>
+<body>
+<main layout:fragment="header">
+    <h1>상품 상세 정보 조회</h1>
+</main>
+<main layout:fragment="contents">
+    <h1>Product Form</h1>
+    <form th:action="@{/products-temp/{id}(id=${product.id})}" th:object="${product}" method="post">
+        <input type="hidden" th:field="*{id}"/>
+
+        <label for="name">Name:</label>
+        <input type="text" id="name" th:field="*{name}" required/>
+
+        <label for="price">Price:</label>
+        <input type="number" id="price" th:field="*{price}" required/>
+
+        <label for="stockCount">Stock Count:</label>
+        <input type="number" id="stockCount" th:field="*{stockCount}" required/>
+
+        <label for="status">Status:</label>
+        <select id="status" th:field="*{status}">
+            <option th:value="PREPARING">PREPARING</option>
+            <option th:value="IN_STOCK">IN_STOCK</option>
+            <option th:value="SOLD_OUT">SOLD_OUT</option>
+            <option th:value="INVALID">INVALID</option>
+            <option th:value="DELETED">DELETED</option>
+        </select>
+
+        <label for="description">Description:</label>
+        <textarea id="description" th:field="*{description}" required></textarea>
+
+        <label for="memo">Memo:</label>
+        <textarea id="memo" th:field="*{memo}" required></textarea>
+
+        <label for="image">Image URL:</label>
+        <input type="text" id="image" th:field="*{image}" required/>
+
+        <label for="createdAt">Created At:</label>
+        <input type="text" id="createdAt" th:field="*{createdAt}" readonly/>
+
+        <label for="updatedAt">Updated At:</label>
+        <input type="text" id="updatedAt" th:field="*{updatedAt}" readonly/>
+
+        <button type="submit">Save</button>
+    </form>
+</main>
+</body>
+</html>

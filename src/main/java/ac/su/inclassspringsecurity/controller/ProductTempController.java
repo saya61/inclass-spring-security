@@ -4,15 +4,18 @@ import ac.su.inclassspringsecurity.domain.Product;
 import ac.su.inclassspringsecurity.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/products-temp")
 public class ProductTempController {
     private final ProductService productService;
 
@@ -73,5 +76,22 @@ public class ProductTempController {
         List<Product> productsPage = productService.getValidProduct();
         model.addAttribute("productsPage", productsPage);
         return "product-detail";
+    }
+
+    @GetMapping("/{id}")
+    public String getProductById(@PathVariable("id") long id, Model model) {
+        Optional<Product> product = productService.getProductById(id);
+        if (product.isPresent()) {
+            model.addAttribute("product", product.get());
+            return "product-form"; // 템플릿 파일 이름
+        } else {
+            return "redirect:/product-temp/products-pagenav"; // 못 찾을 경우
+        }
+    }
+
+    @PostMapping("/{id}")    // Put 맵핑은 Form으로 하기는 조금 그렇다.
+    public String saveProduct(@ModelAttribute Product product) {
+        product = productService.saveProductUpsert(product);
+        return "redirect:/products-temp/" + product.getId(); // 업데이트 후 리디렉션 할 URL
     }
 }

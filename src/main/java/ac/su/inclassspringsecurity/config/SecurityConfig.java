@@ -72,12 +72,12 @@ public class SecurityConfig {
                                 )
                 )
                 .formLogin(
-//                        (formLogin) ->
-//                                formLogin   // Controller 에 PostMapping URL 바인딩
-//                                                 // POST 요청을 아래 라인에서 수신하도록 설정 - 명시적 로그인을 구현하고자 한다.
-//                                        .loginPage("/users/login")
-//                                        .defaultSuccessUrl("/")
-                        AbstractHttpConfigurer::disable
+                        (formLogin) ->
+                                formLogin   // Controller 에 PostMapping URL 바인딩
+                                                 // POST 요청을 아래 라인에서 수신하도록 설정 - 명시적 로그인을 구현하고자 한다.
+                                        .loginPage("/users/login")
+                                        .defaultSuccessUrl("/")
+//                        AbstractHttpConfigurer::disable
                 )
                 .logout(
                         (logout) ->
@@ -86,15 +86,15 @@ public class SecurityConfig {
                                         .logoutSuccessUrl("/")
                                         .invalidateHttpSession(true)
                 )
-                .sessionManagement(
-                        (sessionConfig) -> {
-                            sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-                        }
-                )
-                .addFilterBefore(
-                        tokenAuthenticationFilter(),    // token 을 username, password 검사보다 보다 먼저 검사한다.
-                        UsernamePasswordAuthenticationFilter.class
-                )
+//                .sessionManagement(
+//                        (sessionConfig) -> {
+//                            sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//                        }
+//                )
+//                .addFilterBefore(
+//                        tokenAuthenticationFilter(),    // token 을 username, password 검사보다 보다 먼저 검사한다.
+//                        UsernamePasswordAuthenticationFilter.class
+//                )
         ;
 
         return http.build();

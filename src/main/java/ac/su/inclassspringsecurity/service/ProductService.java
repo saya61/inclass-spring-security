@@ -71,6 +71,20 @@ public class ProductService {
         return productRepository.save(product);
     }
 
+    public Product updateProductPatch(long id, Product product) {
+        // 기존에 없었던 레코드 id 인 경우 null 반환
+        if (productRepository.existsById(id)) {
+            return null;
+        }
+        if (productRepository.findById(id).isPresent()) {
+            Product recordToPatch = productRepository.findById(id).get();
+            if( product.getName() != null) {
+                recordToPatch.setName(product.getName());
+            }
+        }
+        return productRepository.save(product);
+    }
+
     public boolean deleteProduct(long id) {
         if (productRepository.existsById(id)) {
             productRepository.deleteById(id);
@@ -124,17 +138,11 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-
-//    public Product updateProductPatch(long id, Product product) {
-//        // 기존에 없었던 레코드 id 인 경우 null 반환
-//        if (productRepository.existsById(id)) {
-//            return null;
-//        }
-//        if (productRepository.findById(id).isPresent()) {
-//            Product recordToPatch = productRepository.findById(id).get();
-//            if( product.getName() != null) {
-//                recordToPatch.setName(product.getName());
-//            }
-//        }
-//    }
+    public Product saveProductUpsert(Product product) {
+        Product updatedProduct = updateProductPut(product.getId(), product);
+        if (updatedProduct != null) {
+            return updatedProduct;
+        }
+        return createProduct(product);
+    }
 }

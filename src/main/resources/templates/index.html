@@ -14,18 +14,24 @@
     </main>
     <main layout:fragment="contents">
         <div sec:authorize="isAuthenticated()">
-            <h3>Welcome, <span sec:authentication="name"></span></h3>
+            <h3>Welcome,
+                <span sec:authentication="name"></span> <!--  사용자 이름 -->
+                <span sec:authorize="hasAuthority('ROLE_SUPER_ADMIN')">(SUPER_ADMIN)</span> <!-- 사용자 권한이 슈퍼 어드민일 경우 -->
+                <span sec:authorize="hasAuthority('ADMIN')">(ADMIN)</span> <!-- 사용자 권한이 어드민일 경우 -->
+            </h3>
         </div>
         <a href="/products">REST API URL (상대경로)</a><br>
         <a th:href="@{/products}">REST API URL (thymeleaf 상대경로)</a><br>
-        <a href="/thymeleaf/ex01">타임리프 테스트 ex01 URL(상대)</a><br>
-        <a href="http://localhost:8080/thymeleaf/ex01">타임리프 테스트 ex01 URL(절대)</a><br>
-        <a th:href="@{thymeleaf/ex01}">타임리프 테스트 URL(th:href)</a><br>
-        <a th:href="@{thymeleaf/products-page}">타임리프 테스트 URL(기본 파라미터)</a><br>
-        <a th:href="@{thymeleaf/products-page (page='1', size='5')}">타임리프 테스트 URL(커스텀 파라미터)</a><br>
-        <a th:href="@{products-layout-applied (page='1', size='10')}">레이아웃 적용</a>
+        <a href="/products-temp/thymeleaf/ex01">타임리프 테스트 ex01 URL(상대)</a><br>
+        <a href="http://localhost:8080/products-temp/thymeleaf/ex01">타임리프 테스트 ex01 URL(절대)</a><br>
+        <a th:href="@{/products-temp/thymeleaf/ex01}">타임리프 테스트 URL(th:href)</a><br>
+        <a th:href="@{/products-temp/thymeleaf/products-page}">타임리프 테스트 URL(기본 파라미터)</a><br>
+        <a th:href="@{/products-temp/thymeleaf/products-page (page='1', size='5')}">타임리프 테스트 URL(커스텀 파라미터)</a><br>
+        <a th:href="@{/products-temp/products-layout-applied (page='1', size='10')}">레이아웃 적용</a>
         <h4> 페이지 네비게이션이 적용된 상품 페이지 이동</h4>
-        <a th:href="@{products-pagenav (page='1', size='5')}">네비게이션 바 적용</a>
+        <ul>
+            <li><a th:href="@{/products-temp/products-pagenav (page='1', size='10')}">네비게이션 바 적용</a></li>
+        </ul>
     </main>
 </body>
 </html>

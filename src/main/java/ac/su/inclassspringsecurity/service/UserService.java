@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -115,5 +116,25 @@ public class UserService implements UserDetailsService {
             );
         }
         return null;    // 패스워드 불일치 시 null 반환
+    }
+
+    public List<User> makeDummyData(int count) {
+        List<User> users = userRepository.findAll();
+        // 유저 타입별 count 만큼 생성
+        // 기존 유저 수 10명 이상 일 경우 스킵 후 기존 리스트 반환
+        if (userRepository.count() >= 10) {
+            return users;
+        }
+        for (UserRole role : UserRole.values()) {
+            for (int i = 1; i <= count; i++) {
+                User newUser = new User();
+                newUser.setUsername(role.name() + i);
+                newUser.setPassword(passwordEncoder.encode("1234"));
+                newUser.setEmail(role.name() + i + "@tt.cc");
+                newUser.setRole(role);
+                users.add(newUser);
+            }
+        }
+        return userRepository.saveAll(users);
     }
 }
