@@ -4,6 +4,7 @@ import ac.su.inclassspringsecurity.config.Jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -50,6 +51,16 @@ public class SecurityConfig {
                                                 "/users/login"   // 로그인 URL 비회원 접속 허용
                                         )
                                 ).permitAll()
+                                .requestMatchers(
+                                        new AntPathRequestMatcher(
+                                                "/products-temp/**", HttpMethod.GET.name()   // GET 요청에 대해 상품 페이지 접속 허용
+                                        )
+                                ).permitAll()
+                                        .requestMatchers(
+                                                new AntPathRequestMatcher(
+                                                        "/products-temp/**", HttpMethod.GET.name()   // GET 요청에 대해 상품 페이지 접속 허용
+                                                )
+                            ).hasAnyRole("SUPER_ADMIN_ROLE", "ADMIN")   // GET 요청에 대해 상품 페이지 권한에 따른 접속 허용
                                 .anyRequest().authenticated()   // 나머지 모든 URL 회원 로그인 요구
                 )
                 .csrf(

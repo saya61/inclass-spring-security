@@ -1,10 +1,11 @@
 package ac.su.inclassspringsecurity.repository;
 
+import ac.su.inclassspringsecurity.constant.UserRole;
 import ac.su.inclassspringsecurity.domain.User;
-import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 로그인 인증 시 유저 데이터 조회 가능(password, role)
 
     boolean existsByEmail(String email);    // 로그인 인증시 유저 존재 여부 확인
+
+    List<User> findByRole(UserRole role);   // 특정 권한을 가진 유저 조회
 }

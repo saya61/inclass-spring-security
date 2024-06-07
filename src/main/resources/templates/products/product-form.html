@@ -15,17 +15,18 @@
 <main layout:fragment="contents">
     <h1>Product Form</h1>
     <form th:action="@{/products-temp/{id}(id=${product.id})}" th:object="${product}" method="post">
-        <input type="hidden" th:field="*{id}"/>
-
+        <label for="id">id:</label>
+        <input type="text" id="id"  th:field="*{id}"/>
+        <br>
         <label for="name">Name:</label>
         <input type="text" id="name" th:field="*{name}" required/>
-
+        <br>
         <label for="price">Price:</label>
         <input type="number" id="price" th:field="*{price}" required/>
-
+        <br>
         <label for="stockCount">Stock Count:</label>
         <input type="number" id="stockCount" th:field="*{stockCount}" required/>
-
+        <br>
         <label for="status">Status:</label>
         <select id="status" th:field="*{status}">
             <option th:value="PREPARING">PREPARING</option>
@@ -34,23 +35,24 @@
             <option th:value="INVALID">INVALID</option>
             <option th:value="DELETED">DELETED</option>
         </select>
-
+        <br>
         <label for="description">Description:</label>
         <textarea id="description" th:field="*{description}" required></textarea>
-
+        <br>
         <label for="memo">Memo:</label>
         <textarea id="memo" th:field="*{memo}" required></textarea>
-
+        <br>
         <label for="image">Image URL:</label>
         <input type="text" id="image" th:field="*{image}" required/>
-
+        <br>
         <label for="createdAt">Created At:</label>
         <input type="text" id="createdAt" th:field="*{createdAt}" readonly/>
-
+        <br>
         <label for="updatedAt">Updated At:</label>
         <input type="text" id="updatedAt" th:field="*{updatedAt}" readonly/>
-
+        <br>
         <button type="submit">Save</button>
+        <a th:href="@{/products-temp/products-pagenav (page='1', size='10')}">상세 페이지 이동</a>
     </form>
 </main>
 </body>

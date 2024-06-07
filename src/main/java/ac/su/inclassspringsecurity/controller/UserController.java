@@ -1,7 +1,6 @@
 package ac.su.inclassspringsecurity.controller;
 
-import ac.su.inclassspringsecurity.domain.AccessTokenDTO;
-import ac.su.inclassspringsecurity.domain.Product;
+import ac.su.inclassspringsecurity.constant.UserRole;
 import ac.su.inclassspringsecurity.domain.User;
 import ac.su.inclassspringsecurity.domain.UserCreateForm;
 import ac.su.inclassspringsecurity.service.UserService;
@@ -9,6 +8,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+// SPRING SECURITY 가 제공하는 인증, 권한 관련 객체를 가져오기 위한 임포트 문
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -102,4 +108,24 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    @GetMapping("/list")
+    public ResponseEntity<List<User>> getUsers(){
+        Authentication userAuth = SecurityContextHolder.getContext().getAuthentication();
+        String roleStr = userAuth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("");
+
+        UserRole role = UserRole.valueOf(
+                roleStr.replace("ROLE_", "")
+        );
+
+        if (role == UserRole.USER) {
+            return new ResponseEntity<>(null, HttpStatus.FORBIDDEN);
+        }
+
+        // 호출한 유저의 Role 에 따라서 적절한 대상 유저 목록을 검색
+        List<User> users = userService.getUserByRole(role);
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
 }

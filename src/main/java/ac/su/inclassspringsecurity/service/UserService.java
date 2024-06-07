@@ -3,12 +3,15 @@ package ac.su.inclassspringsecurity.service;
 import ac.su.inclassspringsecurity.config.Jwt.JwtProperties;
 import ac.su.inclassspringsecurity.config.Jwt.TokenProvider;
 import ac.su.inclassspringsecurity.constant.UserRole;
-import ac.su.inclassspringsecurity.domain.AccessTokenDTO;
-import ac.su.inclassspringsecurity.domain.SpringUser;
-import ac.su.inclassspringsecurity.domain.User;
+import ac.su.inclassspringsecurity.domain.*;
 import ac.su.inclassspringsecurity.repository.UserRepository;
+import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
+
 // UserDetailsService 패키지에 Spring Security 가 제공하는 인터페이스로, 유저 정보를 가져오는 메서드를 구현해야 함.
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,6 +23,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional  // 실패 시 발생하는 예외 처리를 위해 사용
@@ -136,5 +140,23 @@ public class UserService implements UserDetailsService {
             }
         }
         return userRepository.saveAll(users);
+    }
+
+    public List<User> getUserByRole(UserRole role) {
+//        // 아래 validation 은 불필요 - role 신뢰
+//        if (role == null || role.equals(UserRole.USER)) {
+//            return null;
+//        }
+        List<UserRole> roles = new ArrayList<>();
+        // Role이 늘어나도 똑같이 실행됨
+        for (int i = role.ordinal(); i < UserRole.values().length; i++) {
+            // SUPER 는 i = 0 이므로, 전부 조회됨
+            roles.add(UserRole.values()[i]);
+        }
+        List<User> users = new ArrayList<>();
+        for (UserRole targetRole : roles) {
+            users.addAll(userRepository.findByRole(targetRole));
+        }
+        return users;
     }
 }

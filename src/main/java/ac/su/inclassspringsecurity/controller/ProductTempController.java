@@ -4,8 +4,6 @@ import ac.su.inclassspringsecurity.domain.Product;
 import ac.su.inclassspringsecurity.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -53,20 +51,20 @@ public class ProductTempController {
     ) {
         List<Product> products = productService.getValidProductList(page,size);
         model.addAttribute("products", products);
-        return "products-layout-applied";
+        return "products/products-layout-applied";
     }
 
     @GetMapping("/products-pagenav")
     public String productPageNav(
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "5") int size,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             Model model
     ) {
         Page<Product> productsPage = productService.getValidProductPage(page,size);
         model.addAttribute("productsPage", productsPage);
         model.addAttribute("pageNum", page);
         model.addAttribute("pageSize", size);
-        return "products-pagenav";
+        return "/products/products-pagenav";
     }
 
     @GetMapping("/product-detail")
@@ -75,7 +73,7 @@ public class ProductTempController {
     ) {
         List<Product> productsPage = productService.getValidProduct();
         model.addAttribute("productsPage", productsPage);
-        return "product-detail";
+        return "/products/product-detail";
     }
 
     @GetMapping("/{id}")
@@ -83,9 +81,9 @@ public class ProductTempController {
         Optional<Product> product = productService.getProductById(id);
         if (product.isPresent()) {
             model.addAttribute("product", product.get());
-            return "product-form"; // 템플릿 파일 이름
+            return "/products/product-form"; // 템플릿 파일 이름
         } else {
-            return "redirect:/product-temp/products-pagenav"; // 못 찾을 경우
+            return "redirect:/products-temp/products-pagenav"; // 못 찾을 경우
         }
     }
 

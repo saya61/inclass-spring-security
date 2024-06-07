@@ -11,13 +11,14 @@
 <body>
     <main layout:fragment="header">
         <h1>인덱스 페이지 입니다!</h1>
+        <hr>
     </main>
     <main layout:fragment="contents">
         <div sec:authorize="isAuthenticated()">
             <h3>Welcome,
                 <span sec:authentication="name"></span> <!--  사용자 이름 -->
                 <span sec:authorize="hasAuthority('ROLE_SUPER_ADMIN')">(SUPER_ADMIN)</span> <!-- 사용자 권한이 슈퍼 어드민일 경우 -->
-                <span sec:authorize="hasAuthority('ADMIN')">(ADMIN)</span> <!-- 사용자 권한이 어드민일 경우 -->
+                <span sec:authorize="hasRole('ADMIN')">(ADMIN)</span> <!-- 사용자 권한이 어드민일 경우 -->
             </h3>
         </div>
         <a href="/products">REST API URL (상대경로)</a><br>
@@ -30,7 +31,10 @@
         <a th:href="@{/products-temp/products-layout-applied (page='1', size='10')}">레이아웃 적용</a>
         <h4> 페이지 네비게이션이 적용된 상품 페이지 이동</h4>
         <ul>
-            <li><a th:href="@{/products-temp/products-pagenav (page='1', size='10')}">네비게이션 바 적용</a></li>
+            <li><a th:href="@{/products-temp/products-pagenav (page='1', size='10')}">상품 정보 조회</a></li>
+            <li sec:authorize="hasAnyRole('SUPER_ADMIN', 'ADMIN')">
+                <a th:href="@{users/user-list (page='1', size='10')}">유저 리스트 조회</a>
+            </li>
         </ul>
     </main>
 </body>
