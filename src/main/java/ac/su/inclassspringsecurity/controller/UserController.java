@@ -6,6 +6,7 @@ import ac.su.inclassspringsecurity.domain.UserCreateForm;
 import ac.su.inclassspringsecurity.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,14 +14,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 // SPRING SECURITY 가 제공하는 인증, 권한 관련 객체를 가져오기 위한 임포트 문
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,4 +126,69 @@ public class UserController {
         List<User> users = userService.getUserByRole(role);
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
+
+    @GetMapping("/list-temp")
+    public String getUsers(
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            Model model
+    ){
+
+        Authentication userAuth = SecurityContextHolder.getContext().getAuthentication();
+        String roleStr = userAuth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("");
+
+        UserRole role = UserRole.valueOf(
+                roleStr.replace("ROLE_", "")
+        );
+
+        if (role == UserRole.USER) {
+            // 일반 유저는 유저 리스트를 조회할 수 없다고 안내 (TBD)
+            model.addAttribute("usersPage", Page.empty());
+            model.addAttribute("pageNum", 0);
+            model.addAttribute("pageSize", 0);
+            return "users/user-list";
+        }
+
+        Page<User> usersPage = userService.getUsersPageByRole(role, page, size);
+        model.addAttribute("usersPage", usersPage);
+        model.addAttribute("pageNum", page);
+        model.addAttribute("pageSize", size);
+        return "users/user-list";
+    }
+
+//    @GetMapping("/detail")
+//    public String userPageNav(
+//            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+//            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+//            Model model
+//    ) {
+//        Authentication userAuth = SecurityContextHolder.getContext().getAuthentication();
+//        String roleStr = userAuth.getAuthorities().stream()
+//                .map(GrantedAuthority::getAuthority)
+//                .findFirst()
+//                .orElse("");
+//
+//        UserRole role = UserRole.valueOf(
+//                roleStr.replace("ROLE_", "")
+//        );
+//
+//        Page<User> usersPage = userService.getValidUserPage(page,size, role);
+//        model.addAttribute("usersPage", usersPage);
+//        model.addAttribute("pageNum", page);
+//        model.addAttribute("pageSize", size);
+//        return "users/user-list";
+//    }
+//
+//    @GetMapping("/{id}")
+//    public String getUserById(@PathVariable("id") long id, Model model) {
+//        User user = userService.getUserById(id);
+//        if (user == null) {
+//            return "redirect:/users/detail";
+//        }
+//        model.addAttribute("id", user);
+//        return "users/user-list";
+//    }
 }

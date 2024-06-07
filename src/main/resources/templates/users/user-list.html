@@ -21,10 +21,9 @@
         </thead>
         <tbody>
         <tr th:each="user: ${usersPage.getContent()}">
-            <td th:text="${user.name}">-</td>
-            <!--<td th:text="${user.status}">-</td>  -->
-            <td th:text="${user.price}">-</td>
-            <td th:text="${user.description}">-</td>
+            <td th:text="${user.username}">-</td>
+            <td th:text="${user.email}">-</td>
+            <td th:text="${user.role}">-</td>
             <td sec:authorize="hasAnyAuthority('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')">
                 <a th:href="@{/users/{id}(id=${user.id})}">상세 페이지(TBD)</a>
             </td>

@@ -1,15 +1,14 @@
 package ac.su.inclassspringsecurity.service;
 
-import ac.su.inclassspringsecurity.config.Jwt.JwtProperties;
 import ac.su.inclassspringsecurity.config.Jwt.TokenProvider;
 import ac.su.inclassspringsecurity.constant.UserRole;
 import ac.su.inclassspringsecurity.domain.*;
 import ac.su.inclassspringsecurity.repository.UserRepository;
-import com.querydsl.core.BooleanBuilder;
 import lombok.RequiredArgsConstructor;
 
 // UserDetailsService 패키지에 Spring Security 가 제공하는 인터페이스로, 유저 정보를 가져오는 메서드를 구현해야 함.
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -159,4 +158,42 @@ public class UserService implements UserDetailsService {
         }
         return users;
     }
+
+    public Page<User> getUsersPageByRole(UserRole role, int page, int size) {
+        // 위에 있는 List 를 Page 로 변환
+        List<UserRole> roles = new ArrayList<>();
+        // Role이 늘어나도 똑같이 실행됨
+        for (int i = role.ordinal(); i < UserRole.values().length; i++) {
+            // SUPER 는 i = 0 이므로, 전부 조회됨
+            roles.add(UserRole.values()[i]);
+        }
+        List<User> users = new ArrayList<>();
+        for (UserRole targetRole : roles) {
+            users.addAll(userRepository.findByRole(targetRole));
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        // DB가 항상 촘촘한 것은 아니기에 MIN, MAX 이용(size 가 상한임)
+        int start = Math.min((int) pageable.getOffset(), users.size());     // 시작 인덱스를 잡기 위한 기준점 생성
+        int end = Math.min((start + pageable.getPageSize()), users.size());     // 종료 인덱스를 잡기 위한 기준점 생성
+        // DB 상의 인덱스가 아니라, List 상의 인덱스를 기준으로 자르기
+        List<User> usersPageContent = users.subList(start, end);
+
+        // Page 객체 생성 및 반환
+        // Page 는 인터페이스라 구현체 형태인 PageImpl 사용
+        return new PageImpl<>(usersPageContent, pageable, users.size());
+    }
+
+
+//    public Page<User> getValidUserPage(int page, int size, UserRole role) {
+//        Pageable pageable = PageRequest.of(page, size);
+//        if (role.equals(UserRole.USER)) {
+//            return null;
+//        }
+//        return userRepository.findAll(pageable);
+//    }
+//
+//    public User getUserById(long id) {
+//        return null;
+//    }
 }
