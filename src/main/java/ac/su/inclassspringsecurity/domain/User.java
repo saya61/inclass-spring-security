@@ -25,6 +25,9 @@ public class User {
     @Column(nullable = false)
     private UserRole role;
 
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private Cart cart;
+
     @Override
     public String toString() {
         return "User{" +
@@ -32,7 +35,9 @@ public class User {
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
-                ", Role=" + role +
+                ", Role='" + role + '\'' +
+//                ", Cart=" + cart +
+                (cart != null ? ", cart=" + cart.getId() : "") +
                 '}';
     }
 }

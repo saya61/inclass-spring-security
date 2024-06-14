@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layouts/base-layout}"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>유저 상세 페이지</title>
+</head>
+<body>
+<main layout:fragment="header">
+    <h1>유저 상세 정보 조회</h1>
+</main>
+<main layout:fragment="contents">
+    <h1>User Form</h1>
+    <form th:action="@{/list-temp/{id}(id=${user.id})}" th:object="${user}" method="post">
+        <label for="id">id:</label>
+        <input type="hidden" id="id"  th:field="*{id}"/>
+        <br>
+        <label for="name">Username:</label>
+        <input type="text" id="name" th:field="*{username}" required/>
+        <br>
+        <label for="email">Email:</label>
+        <input type="text" id="email" th:field="*{email}" required/>
+        <br>
+        <label for="role">Role:</label>
+        <input type="text" id="role" th:field="*{role}" required/>
+        <br>
+        <button type="submit">Save</button>
+        <a th:href="@{/list-temp/user-detail (page='1', size='10')}">유저 상세 페이지 이동</a>
+    </form>
+</main>
+</body>
+</html>

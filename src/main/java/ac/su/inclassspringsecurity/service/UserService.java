@@ -22,7 +22,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional  // 실패 시 발생하는 예외 처리를 위해 사용
@@ -184,16 +183,7 @@ public class UserService implements UserDetailsService {
         return new PageImpl<>(usersPageContent, pageable, users.size());
     }
 
-
-//    public Page<User> getValidUserPage(int page, int size, UserRole role) {
-//        Pageable pageable = PageRequest.of(page, size);
-//        if (role.equals(UserRole.USER)) {
-//            return null;
-//        }
-//        return userRepository.findAll(pageable);
-//    }
-//
-//    public User getUserById(long id) {
-//        return null;
-//    }
+    public Optional<User> getUserById(long id) {
+        return userRepository.findById(id);
+    }
 }

@@ -1,6 +1,7 @@
 package ac.su.inclassspringsecurity.controller;
 
 import ac.su.inclassspringsecurity.constant.UserRole;
+import ac.su.inclassspringsecurity.domain.Product;
 import ac.su.inclassspringsecurity.domain.User;
 import ac.su.inclassspringsecurity.domain.UserCreateForm;
 import ac.su.inclassspringsecurity.service.UserService;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -182,13 +184,14 @@ public class UserController {
 //        return "users/user-list";
 //    }
 //
-//    @GetMapping("/{id}")
-//    public String getUserById(@PathVariable("id") long id, Model model) {
-//        User user = userService.getUserById(id);
-//        if (user == null) {
-//            return "redirect:/users/detail";
-//        }
-//        model.addAttribute("id", user);
-//        return "users/user-list";
-//    }
+    @GetMapping("/{id}")
+    public String getUserById(@PathVariable("id") long id, Model model) {
+        Optional<User> user = userService.getUserById(id);
+        if (user.isPresent()) {
+            model.addAttribute("user", user.get());
+            return "/users/user-detail"; // 템플릿 파일 이름
+        } else {
+            return "redirect:/users/list-temp"; // 못 찾을 경우
+        }
+    }
 }
