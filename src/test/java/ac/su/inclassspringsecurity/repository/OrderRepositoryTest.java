@@ -30,7 +30,7 @@ class OrderRepositoryTest {
     private OrderRepository orderRepository;
 
     // 2) 더미 데이터 생성
-    String createDummyOrder() {
+    private String createDummyOrder() {
         // 테스트 회차를 반복하며 유저를 여러번 생성할 때,
         // 중복 유저가 쉽게 생산되지 않도록(Unique field) 생성
         // => UUID 사용(중복 string 발생시키는 방향이면 뭐든 좋음)

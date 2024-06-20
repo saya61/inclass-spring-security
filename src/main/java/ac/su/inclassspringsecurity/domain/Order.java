@@ -4,6 +4,7 @@ import ac.su.inclassspringsecurity.constant.OrderStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldNameConstants;
 
 @Entity
 @Getter @Setter
@@ -18,6 +19,10 @@ public class Order {
     private User user;
 
     @Column(nullable = false)
+    @Enumerated(
+//            EnumType.ORDINAL - 기본
+            EnumType.STRING
+    )
     private OrderStatus status;
 
     @Column(nullable = false)
