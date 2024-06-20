@@ -130,8 +130,8 @@ class CartProductRepositoryTest {
         CreateDummyData();
         // 2) 데이터 조회 쿼리 호출
         List<CartProduct> cartProductList = cartProductRepository.findByCartId(1L);
-        assert !cartProductList.isEmpty();
         // 3) console 출력값 확인
+        assert !cartProductList.isEmpty();
         System.out.println(cartProductList);     // 카트에서 상품 참조 확인
         // 개행 및 파싱 들어가는 print 라이브러리 사용 추천
     }
@@ -140,12 +140,12 @@ class CartProductRepositoryTest {
     @Test
     @DisplayName("상품 아이디로 상품 조회")
     void findByProductId() {
-        // 1) Dummy Data 호출
+        // 1) Dummy Data 생성
         CreateDummyData();
         // 2) 데이터 조회 쿼리 호출
         List<CartProduct> cartProductList = cartProductRepository.findByProductId(1L);
-        assert !cartProductList.isEmpty();
         // 3) console 출력값 확인
+        assert !cartProductList.isEmpty();
         System.out.println(cartProductList);     // 카트에서 상품 참조 확인
     }
 
@@ -153,14 +153,23 @@ class CartProductRepositoryTest {
     @Test
     @DisplayName("여러 개의 상품 조회")
     void findMultipleData() {
-        // 1) Dummy Data 호출
+        // Given When Then 패턴
+
+        // Given (테스트 환경, 설정 등을 제공 : 테스트 사전 요건들)
+        // Multiple Dummy Data 생성
         createMultipleDummyData();
-        // 2) 데이터 조회 쿼리 호출
+
+        // When (테스트 핵심 목표가 되는 메서드 호출)
+        // cart_id 기준으로 CartProduct 데이터 조회
         List<CartProduct> cartProductList1 = cartProductRepository.findByCartId(1L);
-        List<CartProduct> cartProductList2 = cartProductRepository.findByCartId(3L);
-        assert !cartProductList1.isEmpty() && !cartProductList2.isEmpty();
-        // 3) console 출력값 확인
+        List<CartProduct> cartProductList3 = cartProductRepository.findByCartId(3L);
+
+        // Then (테스트 결과 검증 및 확인)
+        // 테스트 결과가 의도에 부합하는지 검사
+        assert !cartProductList1.isEmpty();
+        assert !cartProductList3.isEmpty();
+        // console 출력값 확인
         System.out.println(cartProductList1);     // 카트에서 상품 참조 확인
-        System.out.println(cartProductList2);     // 카트에서 상품 참조 확인
+        System.out.println(cartProductList3);     // 카트에서 상품 참조 확인
     }
 }

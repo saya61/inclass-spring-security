@@ -6,6 +6,8 @@ import lombok.Setter;
 
 @Entity
 @Getter @Setter
+// 중계 테이블
+// 추가적인 데이터 및 쿼리 조절하기 좋은 테이블 형태
 @Table(name = "cart_product")
 public class CartProduct {
     @Id
@@ -37,6 +39,4 @@ public class CartProduct {
                 ", quantity=" + quantity +
                 '}';
     }
-
-
 }
