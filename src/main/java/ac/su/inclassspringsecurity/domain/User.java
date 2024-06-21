@@ -30,9 +30,10 @@ public class User {
 
 //    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    @JsonIgnore     // JsonMapper 가 있는 Jackson 라이브러리를 사용할 때, 무한 루프를 방지하기 위해 사용
+//    @JsonIgnore     // JsonMapper 가 있는 Jackson 라이브러리를 사용할 때, 무한 루프를 방지하기 위해 사용
     private List<Cart> carts;
 
+//    @JsonIgnore
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Order> orders;
 

@@ -4,6 +4,7 @@ import ac.su.inclassspringsecurity.config.Jwt.TokenProvider;
 import ac.su.inclassspringsecurity.constant.UserRole;
 import ac.su.inclassspringsecurity.domain.*;
 import ac.su.inclassspringsecurity.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 // UserDetailsService 패키지에 Spring Security 가 제공하는 인터페이스로, 유저 정보를 가져오는 메서드를 구현해야 함.
@@ -215,8 +216,19 @@ public class UserService implements UserDetailsService {
         return users;
     }
 
+    private final EntityManager entityManager;
+
+    @Transactional
     public List<User> getUserWithJoinFetchedCartsOrders() {
-        List<User> users = userRepository.findAll();
-        return users;
+        String jpqlJoinFetchQuery =
+                "SELECT DISTINCT u " +
+                        "FROM User u " +
+                        "LEFT JOIN FETCH u.carts ";    // User 객체와 orders 객체를 JOIN FETCH 수행
+        List<User> usersWithCartsOrders =
+            entityManager.createQuery(jpqlJoinFetchQuery, User.class).getResultList();
+        for (User user : usersWithCartsOrders) {
+            Hibernate.initialize(user.getOrders());
+        }
+        return usersWithCartsOrders;
     }
 }

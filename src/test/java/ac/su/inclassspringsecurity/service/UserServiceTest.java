@@ -75,7 +75,19 @@ class UserServiceTest {
         // 중복 데이터가 발생 가능성 처리 필요(DISTINCT)
         // 여러 개의 Collection(XxxToMany) 의 경우 모두 JOIN FETCH 처리 불가능
         // 일부는 JOIN FETCH, 일부는 LAZY 로딩으로 처리
-        List<User> users = userService.getUserWithJoinFetchedCartsOrders();
+        List<User> usersWithCarts = userService.getUserWithJoinFetchedCartsOrders();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        try {
+            // ObjectMapper 는 toString() 메서드를 오버라이드 하지 않음
+            // 모든 필드를 접근 => Lazy Loading 에러 발생 => 모든 필드 접근 전에 초기화 필요
+            // 원하는 필드 외에는 JsonIgnore 처리
+            String userListJson = objectMapper.writeValueAsString(usersWithCarts);   // N개의 User 객체를 JSON 문자열로 변환
+            System.out.println(userListJson);
+        } catch (JsonProcessingException e) {   // catch 문을 writeValueAsString() 메서드에 대한 예외 처리로 사용
+            throw new RuntimeException(e);
+        }
     }
 }
 
