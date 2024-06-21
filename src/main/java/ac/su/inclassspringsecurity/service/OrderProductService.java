@@ -138,7 +138,7 @@ public class OrderProductService {
     // 인라인 트랜잭션 적용 코드 예제
     public void createDummyOrderProductWithInlineTransaction() {
         // status 인자를 통해 명시적으로 제어 가능
-        transactionTemplate.execute(status -> {
+        transactionTemplate.execute(status -> { // 시그니처 통일을 위한 람다식 사용 및 return null 사용
             try {
                 // 트랜젝션 시작
                 createDummyOrder();
