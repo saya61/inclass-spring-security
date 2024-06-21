@@ -11,9 +11,13 @@ import ac.su.inclassspringsecurity.repository.OrderProductRepository;
 import ac.su.inclassspringsecurity.repository.OrderRepository;
 import ac.su.inclassspringsecurity.repository.ProductRepository;
 import ac.su.inclassspringsecurity.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -21,22 +25,22 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class OrderProductService {
-
+    // 1) 리포지토리 주입
     private final OrderProductRepository orderProductRepository;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
-    // 2) 더미 데이터 생성 : 총액 계산 및 상품 재고 차감 구현
-    // 2-1) User & Order 생성 부분 OrderRepositoryTest 에서 참고
-    // 2-2) Product 생성 부분 ProductRepositoryTest 에서 참고
-    // 2-3) OrderProduct 생성 -> 주문 수량 만큼 Product 재고 차감 & 총액 계산
-    //      재고 차감 직전에 에러가 나면 어떻게 될까?
-    //      1) 아는 원인 => Data Validation 가능
-    //          - 주문 수량이 재고보다 많을 때, 재고 차감 전에 예외 처리 필요(데이터 문제 Validation)
-    //      2) 모르는 원인 => Data Validation 불가
-    //          - 알 수 없는 에러가 나도 항상 데이터 정합성 보장 필요
-    //          - 트랜잭션 적용 (All or Nothing) -> Service Layer 에서 Transaction 적용
+    // TransactionTemplate 을 사용하여 Transaction 을 직접 제어할 수 있음
+    private final TransactionTemplate transactionTemplate;
+
+    // EntityManager 를 사용하여 직접 쿼리를 작성할 수 있음
+    // EntityManager 를 사용하여 트랜잭션을 직접 제어할 수 있음
+    // 현재 Bean(OrderProductService)에서 동일한 EntityManager 객체로 Transaction 을 제어하는 단위 형성됨
+    // => DB 접근을 Transaction 의 요건에 맞춰서 제어할 수 있는 단일 Context 로 작용
+    // => ACID의 Isolation 요건을 갖추려면 단일 Context 로 작용하는 EntityManager 가 필요
+    @PersistenceContext
+    private EntityManager entityManager;    // 현재 객체에 주입되는 Repository 와 Binding 되는 효과
 
     private String createDummyOrder() {
         // 테스트 회차를 반복하며 유저를 여러번 생성할 때,
@@ -61,7 +65,7 @@ public class OrderProductService {
         return user.getUsername();
     }
 
-    private List<Product> createDummyProduct() {
+    private List<Product> createDummyProducts() {
         List<Product> productList = new ArrayList<>();
         for (int i = 1; i <= 5; i++) {
             Product product = new Product();
@@ -82,15 +86,16 @@ public class OrderProductService {
         return savedProductList;
     }
 
-    @Transactional  // 서비스 외부에서 호출 시 transaction 적용 가능
+    @Transactional  // transaction 적용, 서비스 레이어 없으면 효력없음
+    // 효력 없는 이유 : 클래스 단위로 외부 클래스를 호출할 때에, Proxy 패턴을 통해 적용되기 때문
+    // 클래스 간의 호출인 경우만 Transaction 의 시작과 종료를 제어 가능
     public void createDummyOrderProduct() {
         createDummyOrder();
 
         // 2-1) User & Order 생성 부분 OrderRepositoryTest 에서 참고
-        List<Product> createdProductList = createDummyProduct();
+        List<Product> createdProductList = createDummyProducts();
         // 2-2) Product 생성 부분 ProductRepositoryTest 에서 참고
         List<OrderProduct> createdOrderProductList = new ArrayList<>();
-
         Map<Product, Integer> OrderAmountPerProduct = new HashMap<>();
 
         for (Product product : createdProductList) {
@@ -119,15 +124,73 @@ public class OrderProductService {
         }
         orderProductRepository.saveAll(createdOrderProductList);
 
-
         // 재고 차감 직전에 에러 발생
-//        String errorStr = null;
-//        System.out.println(errorStr.length());  // NullPointerException 발생
+        String errorStr = null;
+        System.out.println(errorStr.length());  // NullPointerException 발생
         // 주문 수량 만큼 Product 재고 차감
         for (Product product : createdProductList) {
             // 직전 재고 수량에서 주문 수량 차감 후 저장
             product.setStockCount(product.getStockCount() - OrderAmountPerProduct.get(product));
             productRepository.save(product);
         }
+    }
+
+    // 인라인 트랜잭션 적용 코드 예제
+    public void createDummyOrderProductWithInlineTransaction() {
+        // status 인자를 통해 명시적으로 제어 가능
+        transactionTemplate.execute(status -> {
+            try {
+                // 트랜젝션 시작
+                createDummyOrder();
+                List<Product> createdProductList = createDummyProducts();
+                List<OrderProduct> createdOrderProductList = new ArrayList<>();
+                Map<Product, Integer> OrderAmountPerProduct = new HashMap<>();
+
+                for (Product product : createdProductList) {
+                    OrderProduct orderProduct = new OrderProduct();
+                    // 초기화 (상품을 랜덤하게 1~10개 담기)
+                    Optional<Order> lastOrder = orderRepository.findFirstByOrderByIdDesc();
+                    assert lastOrder.isPresent();
+                    Order order = lastOrder.get();
+
+                    orderProduct.setOrder(order);
+                    orderProduct.setProduct(product);
+
+                    // 주문 수량 Random 설정
+                    int orderedAmount = (int) (Math.random() * 10) + 1;
+                    orderProduct.setQuantity(orderedAmount);    // 주문을 수행 => 상품 Entity 변경이 반드시 동반 되어야 함
+                    OrderAmountPerProduct.put(product, orderedAmount);
+
+                    // 가격 계산
+                    orderProduct.setTotalPrice(product.getPrice() * orderedAmount);
+
+                    // 기타 필수 정보 업데이트
+                    orderProduct.setCreatedAt(String.valueOf(LocalDateTime.now()));
+                    orderProduct.setUpdatedAt(String.valueOf(LocalDateTime.now()));
+
+                    createdOrderProductList.add(orderProduct);
+                }
+
+                for (Product product : createdProductList) {
+                    // 직전 재고 수량에서 주문 수량 차감 후 저장
+                    product.setStockCount(product.getStockCount() - OrderAmountPerProduct.get(product));
+                }
+
+                // 연관 관계 뿐 아니라, Atomic 하게 다루고 싶은 작업은 전부 트랜젝션으로 묶어서 처리
+                // disk, cache 등등 어떤 대상이건 Atomic 하게 다룰 수 있게 된다.
+                // Application 단에서의 Transaction 이 가지는 장점!
+                orderProductRepository.saveAll(createdOrderProductList);
+//                String errorStr = null;
+//                System.out.println(errorStr.length());
+                productRepository.saveAll(createdProductList);
+                // 모든 연관 관계 Entity 저장 성공 시 트랜젝션 커밋
+            } catch (Exception e) {
+                status.setRollbackOnly();
+                // 함께 롤백 되어야 하는 부가 로직들을 정의할 수가 있음
+                // DB 뿐만 아니라, 다른 영역에서의 작업들을 함께 롤백 처리 가능
+                throw e;
+            }
+            return null;
+        });
     }
 }

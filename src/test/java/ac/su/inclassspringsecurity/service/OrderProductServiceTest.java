@@ -14,6 +14,7 @@ class OrderProductServiceTest {
     private OrderProductService orderProductService;
     @Test
     void createDummyOrderProduct() {
-        orderProductService.createDummyOrderProduct();
+//        orderProductService.createDummyOrderProduct();
+        orderProductService.createDummyOrderProductWithInlineTransaction();
     }
 }

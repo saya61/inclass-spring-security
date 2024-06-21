@@ -112,6 +112,7 @@ class OrderProductRepositoryTest {
             // 주문 수량 Random 설정
             int orderedAmount = (int)(Math.random() * 10) + 1;
             orderProduct.setQuantity(orderedAmount);    // 주문을 수행 => 상품 Entity 변경이 반드시 동반 되어야 함
+            OrderAmountPerProduct.put(product, orderedAmount);
 
             // 가격 계산
             orderProduct.setTotalPrice(product.getPrice() * orderedAmount);
@@ -121,7 +122,6 @@ class OrderProductRepositoryTest {
             orderProduct.setUpdatedAt(String.valueOf(LocalDateTime.now()));
 
             createdOrderProductList.add(orderProduct);
-            OrderAmountPerProduct.put(product, orderedAmount);
         }
         orderProductRepository.saveAll(createdOrderProductList);
 

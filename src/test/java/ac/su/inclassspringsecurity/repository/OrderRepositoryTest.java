@@ -95,7 +95,13 @@ class OrderRepositoryTest {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-
 //        System.out.println(lastOrder);
+    }
+
+    @Test
+    void checkOrderLazyUserLoad() {
+        Optional<Order> order = orderRepository.findById(14L);
+        assert order.isPresent();
+        System.out.println(order.get());
     }
 }
