@@ -87,6 +87,8 @@ class OrderProductRepositoryTest {
     }
 
     @Transactional  // transaction 적용, 서비스 레이어 없으면 효력없음
+    // 효력 없는 이유 : 클래스 단위로 외부 클래스를 호출할 때에, Proxy 패턴을 통해 적용되기 때문
+    // 클래스 간의 호출인 경우만 Transaction 의 시작과 종료를 제어 가능
     public void createDummyOrderProduct() {
         createDummyOrder();
 
