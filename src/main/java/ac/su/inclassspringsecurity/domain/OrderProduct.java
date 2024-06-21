@@ -35,7 +35,6 @@ public class OrderProduct {
     @Column(nullable = false)
     private String updatedAt;
 
-
     @Override
     public String toString() {
         return "OrderProduct{" +

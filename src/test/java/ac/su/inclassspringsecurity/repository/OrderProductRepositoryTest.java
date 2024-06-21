@@ -123,7 +123,6 @@ class OrderProductRepositoryTest {
         }
         orderProductRepository.saveAll(createdOrderProductList);
 
-
         // 재고 차감 직전에 에러 발생
         String errorStr = null;
         System.out.println(errorStr.length());  // NullPointerException 발생
