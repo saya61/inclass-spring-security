@@ -7,6 +7,7 @@ import ac.su.inclassspringsecurity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 // UserDetailsService 패키지에 Spring Security 가 제공하는 인터페이스로, 유저 정보를 가져오는 메서드를 구현해야 함.
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -185,5 +186,37 @@ public class UserService implements UserDetailsService {
 
     public Optional<User> getUserById(long id) {
         return userRepository.findById(id);
+    }
+
+    @Transactional
+    public User getUserWithFetchedOrders() {
+        // 1) user 객체 조회, Lazy 필드 조회 없음
+        Optional<User> userOptional = userRepository.findFirstByOrderByIdDesc();
+//        Optional<User> userOptional = userRepository.findById(98L);
+        assert userOptional.isPresent();
+        User user = userOptional.get();
+        // Lazy Loading 방식의 데이터 Fetch 수행
+        // 메인 엔티티 로드 후, 추가 쿼리를 수동 실행
+        Hibernate.initialize(user.getOrders());  // 부가 쿼리를 객체 관계에 맞춰 초기화 수행
+
+        return user;
+    }
+
+    @Transactional
+    public List<User> getUserListWithFetchedOrders() {
+        // 1) user 리스트 조회, Lazy 필드 후속 조회
+        List<User> users = userRepository.findAll();
+        assert !users.isEmpty();
+        for (User user : users) {
+            // Lazy Loading 방식의 데이터 Fetch 수행
+            // 메인 엔티티 로드 후, + N 추가 쿼리를 수동 실행
+            Hibernate.initialize(user.getOrders());
+        }
+        return users;
+    }
+
+    public List<User> getUserWithJoinFetchedCartsOrders() {
+        List<User> users = userRepository.findAll();
+        return users;
     }
 }

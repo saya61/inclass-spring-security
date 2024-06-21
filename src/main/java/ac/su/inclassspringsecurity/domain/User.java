@@ -1,8 +1,11 @@
 package ac.su.inclassspringsecurity.domain;
 
 import ac.su.inclassspringsecurity.constant.UserRole;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -25,8 +28,13 @@ public class User {
     @Column(nullable = false)
     private UserRole role;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
-    private Cart cart;
+//    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore     // JsonMapper 가 있는 Jackson 라이브러리를 사용할 때, 무한 루프를 방지하기 위해 사용
+    private List<Cart> carts;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Order> orders;
 
     @Override
     public String toString() {
@@ -37,7 +45,8 @@ public class User {
                 ", email='" + email + '\'' +
                 ", Role='" + role + '\'' +
 //                ", Cart=" + cart +
-                (cart != null ? ", cart=" + cart.getId() : "") +
+//                (carts != null ? ", cart=" + carts : "") +
+                (orders != null ? ", orders=" + orders : "") +
                 '}';
     }
 }
